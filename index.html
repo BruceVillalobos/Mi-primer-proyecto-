@@ -1,5 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head><title>Mi primera página</title></head>
-<body><h1>¡Hola, funciona!</h1></body>
+<body><h1>un nuevo comienzo</h1></body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>BRUCE - Proyecto Uno
+</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #0d0d0d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+  }
+
+  .estrella {
+    font-size: 90px;
+    color: #ffd633;
+    text-shadow: 0 0 20px #ffd633, 0 0 40px #ffae00;
+    animation: brillo 1.2s ease-in-out infinite;
+  }
+
+  @keyframes brillo {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    50% { transform: scale(1.25) rotate(15deg); opacity: 0.7; }
+  }
+
+  .texto {
+    margin-top: 30px;
+    font-size: 28px;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 3px solid #ffd633;
+    width: 0;
+    animation: escribir 2.5s steps(30, end) forwards, parpadeo 0.7s step-end infinite;
+  }
+
+  @keyframes escribir {
+    from { width: 0; }
+    to { width: 20ch; }
+  }
+
+  @keyframes parpadeo {
+    50% { border-color: transparent; }
+  }
+</style>
+</head>
+<body>
+  <div class="estrella">&#9733;</div>
+  <div class="texto">BRUCE - Proyecto Uno</div>
+</body>
 </html>
