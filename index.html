@@ -2,156 +2,921 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Primer proyecto - Bruce</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>estudios — Visual Studio Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    height: 100vh;
-    background: linear-gradient(to bottom, #000000 0%, #1a1a1a 45%, #2b2b2b 100%);
-    overflow: hidden;
-    position: relative;
-    font-family: 'Georgia', serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  :root{
+    --bg:#1e1e2e;
+    --panel:#181825;
+    --panel-alt:#11111b;
+    --border:#313244;
+    --border-soft:#282838;
+    --text:#cdd6f4;
+    --text-dim:#9399b2;
+    --text-faint:#6c7086;
+    --accent:#f9e2af;
+    --accent2:#94e2d5;
+    --accent3:#cba6f7;
+    --danger:#f38ba8;
+    --success:#a6e3a1;
+    --blue:#89b4fa;
+    --orange:#fab387;
   }
-
-  /* Luna */
-  .luna {
-    position: absolute;
-    top: 60px;
-    right: 100px;
-    width: 90px;
-    height: 90px;
-    background: #f5f5f5;
-    border-radius: 50%;
-    box-shadow: 0 0 60px #ffffff, 0 0 120px rgba(255,255,255,0.35);
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--panel-alt);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    font-size:14px;
   }
+  ::selection{background:var(--accent3); color:#11111b;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border); border-radius:5px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--text-faint);}
+  code, .mono{font-family:'JetBrains Mono', monospace;}
 
-  /* Torii */
-  .torii {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 320px;
-    opacity: 0.9;
+  /* ===== TITLE BAR ===== */
+  .titlebar{
+    background:var(--panel-alt); height:38px; display:flex; align-items:center;
+    padding:0 14px; gap:10px; border-bottom:1px solid var(--border-soft);
+    flex-shrink:0; user-select:none;
   }
-  .torii svg { width: 100%; filter: drop-shadow(0 0 15px rgba(255,255,255,0.25)); }
+  .dots{display:flex; gap:7px;}
+  .dot{width:11px; height:11px; border-radius:50%;}
+  .dot.red{background:#f38ba8;} .dot.yellow{background:#f9e2af;} .dot.green{background:#a6e3a1;}
+  .titlebar-label{font-family:'JetBrains Mono', monospace; font-size:12px; color:var(--text-faint); margin:0 auto; letter-spacing:0.02em;}
+  .titlebar-spacer{width:60px;}
+  .mobile-toggle{display:none; background:none; border:none; color:var(--text-dim); font-size:16px; cursor:pointer;}
 
-  /* Petalos */
-  .petalo {
-    position: absolute;
-    top: -20px;
-    color: #e8e8e8;
-    animation: caer linear infinite;
-    user-select: none;
-    opacity: 0.85;
+  /* ===== APP BODY ===== */
+  .app{flex:1; display:flex; min-height:0;}
+
+  /* ===== ACTIVITY BAR ===== */
+  .activitybar{
+    width:48px; background:var(--panel-alt); border-right:1px solid var(--border-soft);
+    display:flex; flex-direction:column; align-items:center; padding-top:12px; gap:4px; flex-shrink:0;
   }
-
-  @keyframes caer {
-    0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.9; }
-    100% { transform: translateY(110vh) translateX(60px) rotate(360deg); opacity: 0.2; }
+  .activity-icon{
+    width:48px; height:44px; display:flex; align-items:center; justify-content:center;
+    color:var(--text-faint); font-size:19px; cursor:pointer; border-left:2px solid transparent;
   }
+  .activity-icon:hover{color:var(--text);}
+  .activity-icon.active{color:var(--text); border-left-color:var(--accent);}
 
-  /* Textos */
-  .contenedor-texto {
-    z-index: 5;
-    text-align: center;
-    margin-bottom: 40px;
+  /* ===== SIDEBAR ===== */
+  .sidebar{
+    width:250px; background:var(--panel); border-right:1px solid var(--border-soft);
+    display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto;
   }
-
-  .japones {
-    font-size: 34px;
-    color: #ffffff;
-    letter-spacing: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    border-right: 2px solid #ffffff;
-    width: 0;
-    margin: 0 auto;
-    animation: escribir1 2s steps(12) forwards, parpadeo 0.7s step-end infinite;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  .sidebar-title{font-size:11px; letter-spacing:0.12em; color:var(--text-faint); padding:14px 16px 8px; font-weight:600;}
+  .tree-folder{
+    font-size:12.5px; color:var(--text-dim); padding:7px 12px 7px 16px;
+    display:flex; align-items:center; gap:6px; font-weight:600; letter-spacing:0.02em;
+    cursor:pointer; margin-top:4px;
   }
-
-  .subtitulo {
-    margin-top: 18px;
-    font-size: 16px;
-    letter-spacing: 3px;
-    color: #b0b0b0;
-    opacity: 0;
-    animation: aparecer 1.5s ease forwards;
-    animation-delay: 2.3s;
+  .tree-folder:hover{color:var(--text);}
+  .tree-folder .chev{font-size:10px; transition:transform .15s; color:var(--text-faint); width:10px;}
+  .tree-folder.collapsed .chev{transform:rotate(-90deg);}
+  .tree-children{overflow:hidden;}
+  .tree-children.collapsed{display:none;}
+  .tree-item{
+    padding:6px 12px 6px 34px; font-size:13px; color:var(--text-dim); cursor:pointer;
+    display:flex; align-items:center; gap:8px; border-left:2px solid transparent; white-space:nowrap;
   }
+  .tree-item .file-icon{width:14px; text-align:center; font-size:12px; flex-shrink:0;}
+  .tree-item:hover{background:var(--border-soft); color:var(--text);}
+  .tree-item.active{background:var(--border-soft); color:var(--text); border-left-color:var(--accent);}
 
-  .nombre {
-    margin-top: 30px;
-    font-size: 22px;
-    letter-spacing: 8px;
-    color: #ffffff;
-    text-transform: uppercase;
-    opacity: 0;
-    animation: aparecer 1.5s ease forwards;
-    animation-delay: 3s;
-    text-shadow: 0 0 15px rgba(255,255,255,0.6);
+  /* ===== MAIN / EDITOR ===== */
+  .editor{flex:1; display:flex; flex-direction:column; min-width:0; background:var(--bg);}
+  .tabs{display:flex; background:var(--panel-alt); border-bottom:1px solid var(--border-soft); flex-shrink:0; overflow-x:auto;}
+  .tab{
+    padding:10px 16px; font-size:12.5px; color:var(--text-faint); background:var(--panel-alt);
+    border-right:1px solid var(--border-soft); display:flex; align-items:center; gap:7px; cursor:pointer; white-space:nowrap;
   }
+  .tab.active{background:var(--bg); color:var(--text); box-shadow:inset 0 -2px 0 var(--accent);}
+  .tab .file-icon{font-size:12px;}
+  .breadcrumb{padding:7px 20px; font-size:12px; color:var(--text-faint); border-bottom:1px solid var(--border-soft); font-family:'JetBrains Mono', monospace; flex-shrink:0;}
+  .breadcrumb span{color:var(--text-dim);}
+  .view-scroll{flex:1; overflow-y:auto; padding:32px 40px 60px;}
+  .view{display:none;}
+  .view.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+  h1.view-title{font-family:'JetBrains Mono', monospace; font-size:22px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:10px;}
+  .view-sub{color:var(--text-faint); font-size:13px; margin-bottom:28px;}
+  .comment{color:var(--text-faint); font-family:'JetBrains Mono',monospace;}
+  .section-label{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.1em; color:var(--text-faint); text-transform:uppercase; margin:26px 0 10px;}
+  .section-label:first-of-type{margin-top:0;}
 
-  .nombre span {
-    color: #999999;
-    border-bottom: 1px solid #999999;
+  /* ===== INICIO / DASHBOARD ===== */
+  .greeting-card{
+    background:linear-gradient(135deg, #232338, #1c1c2c);
+    border:1px solid var(--border); border-radius:10px; padding:22px 24px; margin-bottom:22px;
   }
+  .greeting-card .greet{font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700; margin-bottom:4px;}
+  .greeting-card .greet-sub{color:var(--text-faint); font-size:12.5px;}
+  .stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:26px;}
+  .stat-card{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:15px 16px;}
+  .stat-card .stat-num{font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:700;}
+  .stat-card .stat-label{font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+  .stat-card.accent .stat-num{color:var(--accent);}
+  .stat-card.accent2 .stat-num{color:var(--accent2);}
+  .stat-card.danger .stat-num{color:var(--danger);}
+  .stat-card.success .stat-num{color:var(--success);}
 
-  @keyframes escribir1 {
-    from { width: 0; }
-    to { width: 12ch; }
+  .today-list{display:flex; flex-direction:column; gap:8px; margin-bottom:26px;}
+  .today-item{
+    display:flex; align-items:center; gap:12px; background:var(--panel); border:1px solid var(--border);
+    border-left:3px solid var(--accent2); border-radius:6px; padding:10px 14px;
   }
+  .today-item .ti-time{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); width:100px; flex-shrink:0;}
+  .today-item .ti-name{font-size:13px; font-weight:600;}
+  .today-item .ti-teacher{font-size:11.5px; color:var(--text-faint);}
+  .empty-today{color:var(--text-faint); font-size:12.5px; font-style:italic; padding:10px 2px;}
 
-  @keyframes parpadeo {
-    50% { border-color: transparent; }
+  .quicklinks{display:flex; flex-wrap:wrap; gap:10px;}
+  .quicklink{
+    background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:10px 16px;
+    font-size:12.5px; color:var(--text-dim); cursor:pointer; display:flex; align-items:center; gap:8px;
   }
+  .quicklink:hover{border-color:var(--accent2); color:var(--text);}
 
-  @keyframes aparecer {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .urgent-list{display:flex; flex-direction:column; gap:6px;}
+  .urgent-item{display:flex; align-items:center; gap:10px; font-size:12.5px; padding:7px 10px; background:var(--panel); border:1px solid var(--border); border-radius:6px;}
+  .urgent-item .u-tag{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--bg); background:var(--accent3); padding:2px 6px; border-radius:4px; font-weight:700; flex-shrink:0;}
+
+  /* ===== HORARIO ===== */
+  .schedule-grid{display:grid; grid-template-columns:70px repeat(5, 1fr); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:760px;}
+  .sg-head{background:var(--panel); padding:10px 8px; font-family:'JetBrains Mono', monospace; font-size:11.5px; color:var(--text-dim); text-align:center; border-bottom:1px solid var(--border); border-left:1px solid var(--border-soft); letter-spacing:0.06em;}
+  .sg-head.today{color:var(--accent); background:#23233a;}
+  .sg-corner{background:var(--panel-alt); border-bottom:1px solid var(--border);}
+  .sg-time{background:var(--panel-alt); color:var(--text-faint); font-family:'JetBrains Mono', monospace; font-size:10.5px; padding:4px; text-align:right; border-top:1px solid var(--border-soft);}
+  .sg-cell{border-top:1px solid var(--border-soft); border-left:1px solid var(--border-soft); min-height:22px; position:relative;}
+  .sg-cell.today-col{background:rgba(249,226,175,0.04);}
+  .class-block{position:absolute; left:3px; right:3px; border-radius:5px; padding:5px 7px; font-size:11px; line-height:1.35; overflow:hidden; border-left:3px solid var(--accent2); background:#232338;}
+  .class-block .cname{font-weight:600; color:var(--text); display:block;}
+  .class-block .cteacher{color:var(--text-faint); font-size:10px;}
+  .class-block .ctime{color:var(--text-faint); font-size:10px; font-family:'JetBrains Mono',monospace;}
+  .legend{display:flex; gap:16px; margin-top:16px; flex-wrap:wrap;}
+  .legend-item{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-dim);}
+  .legend-dot{width:9px; height:9px; border-radius:2px;}
+  .next-class-card{margin-top:26px; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:16px 18px; display:flex; align-items:center; gap:14px;}
+  .next-class-card .pulse{width:9px; height:9px; border-radius:50%; background:var(--success); box-shadow:0 0 0 0 rgba(166,227,161,.6); animation:pulse 2s infinite; flex-shrink:0;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(166,227,161,.5);} 70%{box-shadow:0 0 0 8px rgba(166,227,161,0);} 100%{box-shadow:0 0 0 0 rgba(166,227,161,0);}}
+
+  /* ===== CURSOS ===== */
+  .cursos-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:16px;}
+  .curso-card{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:16px 18px 18px; display:flex; flex-direction:column; gap:10px;}
+  .curso-card .tag{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--bg); display:inline-block; padding:2px 7px; border-radius:4px; width:fit-content; font-weight:700;}
+  .curso-card h3{font-size:15px; font-weight:600;}
+  .curso-card .docente{font-size:12px; color:var(--text-faint);}
+  .curso-card .schedule-line{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); background:var(--panel-alt); border:1px solid var(--border-soft); border-radius:5px; padding:5px 8px;}
+  .progress-track{height:5px; background:var(--panel-alt); border-radius:3px; overflow:hidden; border:1px solid var(--border-soft);}
+  .progress-fill{height:100%; background:var(--accent2); transition:width .3s;}
+  .progress-label{font-size:10.5px; color:var(--text-faint); display:flex; justify-content:space-between;}
+  .todo-list{display:flex; flex-direction:column; gap:5px; margin-top:2px;}
+  .todo-item{display:flex; align-items:center; gap:8px; font-size:12.5px; padding:4px 6px; border-radius:4px;}
+  .todo-item:hover{background:var(--panel-alt);}
+  .todo-item input[type=checkbox]{accent-color:var(--accent2); width:14px; height:14px; cursor:pointer; flex-shrink:0;}
+  .todo-item span{flex:1; word-break:break-word;}
+  .todo-item.done span{text-decoration:line-through; color:var(--text-faint);}
+  .todo-del{color:var(--text-faint); cursor:pointer; font-size:13px; opacity:0; transition:opacity .15s; flex-shrink:0;}
+  .todo-item:hover .todo-del{opacity:1;}
+  .todo-del:hover{color:var(--danger);}
+  .todo-add{display:flex; gap:6px; margin-top:2px;}
+  .todo-add input{flex:1; background:var(--panel-alt); border:1px solid var(--border-soft); color:var(--text); font-size:12px; padding:6px 8px; border-radius:5px; font-family:'Inter',sans-serif;}
+  .todo-add input:focus{outline:none; border-color:var(--accent2);}
+  .todo-add button{background:var(--border-soft); border:1px solid var(--border); color:var(--text-dim); padding:0 10px; border-radius:5px; cursor:pointer; font-size:14px;}
+  .todo-add button:hover{background:var(--accent2); color:var(--bg); border-color:var(--accent2);}
+  .empty-tasks{color:var(--text-faint); font-size:11.5px; font-style:italic; padding:2px 6px;}
+
+  /* ===== APPS ===== */
+  .apps-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:14px;}
+  .app-card{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:15px 17px; display:flex; gap:13px;}
+  .app-icon{width:38px; height:38px; background:var(--panel-alt); border:1px solid var(--border-soft); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;}
+  .app-card h3{font-size:14px; margin-bottom:4px;}
+  .app-card p{font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+  .app-tag{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent3); margin-top:6px; display:block;}
+
+  /* ===== RECURSOS ===== */
+  .recurso-block{margin-bottom:26px; border-left:2px solid var(--border); padding-left:16px;}
+  .recurso-block h2{font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--accent); margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .recurso-cols{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:18px;}
+  .recurso-col h4{font-size:11px; letter-spacing:0.06em; color:var(--text-faint); text-transform:uppercase; margin-bottom:8px;}
+  .recurso-col ul{list-style:none; display:flex; flex-direction:column; gap:6px;}
+  .recurso-col li{font-size:12.5px; color:var(--text-dim); padding-left:14px; position:relative; line-height:1.4;}
+  .recurso-col li::before{content:"›"; position:absolute; left:0; color:var(--accent2); font-family:'JetBrains Mono',monospace;}
+  .recurso-col li b{color:var(--text);}
+
+  /* ===== CHEATSHEET ===== */
+  .cheat-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(320px,1fr)); gap:18px;}
+  .cheat-block{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:16px 18px;}
+  .cheat-block h3{font-size:13.5px; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+  .cheat-row{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--border-soft);}
+  .cheat-row:last-child{border-bottom:none;}
+  .cheat-key{font-family:'JetBrains Mono',monospace; font-size:11.5px; background:var(--panel-alt); border:1px solid var(--border-soft); color:var(--accent2); padding:3px 8px; border-radius:5px; white-space:nowrap; flex-shrink:0;}
+  .cheat-desc{font-size:12px; color:var(--text-dim); text-align:right;}
+
+  /* ===== POMODORO ===== */
+  .pomodoro-wrap{display:flex; gap:36px; flex-wrap:wrap; align-items:flex-start;}
+  .pomodoro-timer{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:30px 34px; display:flex; flex-direction:column; align-items:center; gap:18px; min-width:280px;}
+  .ring-wrap{position:relative; width:200px; height:200px;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-time{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring-time .rt-num{font-family:'JetBrains Mono',monospace; font-size:34px; font-weight:700;}
+  .ring-time .rt-mode{font-size:11px; color:var(--text-faint); letter-spacing:0.08em; text-transform:uppercase; margin-top:2px;}
+  .pomo-modes{display:flex; gap:8px;}
+  .pomo-mode-btn{background:var(--panel-alt); border:1px solid var(--border-soft); color:var(--text-dim); padding:6px 14px; border-radius:20px; font-size:12px; cursor:pointer;}
+  .pomo-mode-btn.active{background:var(--accent2); color:var(--bg); border-color:var(--accent2); font-weight:600;}
+  .pomo-controls{display:flex; gap:10px;}
+  .pomo-btn{background:var(--accent); color:var(--bg); border:none; padding:9px 22px; border-radius:20px; font-weight:700; font-size:13px; cursor:pointer;}
+  .pomo-btn.secondary{background:var(--panel-alt); color:var(--text-dim); border:1px solid var(--border-soft);}
+  .pomo-btn:hover{opacity:0.88;}
+  .pomo-count{font-size:12px; color:var(--text-faint);}
+  .pomo-tips{flex:1; min-width:240px;}
+  .pomo-tips .recurso-col{margin-bottom:14px;}
+
+  /* ===== GLOSARIO ===== */
+  .glosario-search{width:100%; max-width:340px; background:var(--panel); border:1px solid var(--border); color:var(--text); padding:9px 14px; border-radius:7px; font-size:13px; margin-bottom:20px; font-family:'Inter',sans-serif;}
+  .glosario-search:focus{outline:none; border-color:var(--accent2);}
+  .glosario-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:12px;}
+  .glosario-item{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:13px 15px;}
+  .glosario-item .g-term{font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent3); font-weight:700; margin-bottom:4px;}
+  .glosario-item .g-def{font-size:12.5px; color:var(--text-dim); line-height:1.5;}
+  .glosario-item.hidden{display:none;}
+
+  /* ===== STATUS BAR ===== */
+  .statusbar{height:24px; background:var(--accent3); color:#181825; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font-family:'JetBrains Mono',monospace; font-size:11.5px; flex-shrink:0; font-weight:600;}
+  .statusbar-left, .statusbar-right{display:flex; gap:16px; align-items:center;}
+
+  @media (max-width:820px){
+    .mobile-toggle{display:block;}
+    .sidebar{position:fixed; z-index:20; height:calc(100% - 62px); top:38px; transform:translateX(-100%); transition:transform .2s;}
+    .sidebar.open{transform:translateX(0);}
+    .view-scroll{padding:20px 16px 50px;}
+    .schedule-grid{overflow-x:auto;}
+    .pomodoro-wrap{flex-direction:column;}
   }
 </style>
 </head>
 <body>
 
-  <div class="luna"></div>
-
-  <div class="contenedor-texto">
-    <div class="japones">私の最初のプロジェクト</div>
-    <div class="subtitulo">MI PRIMER PROYECTO</div>
-    <div class="nombre">creado por <span>Bruce</span></div>
+  <div class="titlebar">
+    <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
+    <button class="mobile-toggle" id="mobileToggle">☰</button>
+    <div class="titlebar-label" id="titlebarLabel">inicio.md — estudios — Visual Studio Code</div>
+    <div class="titlebar-spacer"></div>
   </div>
 
-  <div class="torii">
-    <svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
-      <rect x="20" y="40" width="260" height="16" fill="#e5e5e5"/>
-      <rect x="10" y="65" width="280" height="10" fill="#cfcfcf"/>
-      <rect x="55" y="55" width="18" height="140" fill="#e5e5e5"/>
-      <rect x="227" y="55" width="18" height="140" fill="#e5e5e5"/>
-      <rect x="130" y="75" width="40" height="10" fill="#cfcfcf"/>
-    </svg>
+  <div class="app">
+    <div class="activitybar">
+      <div class="activity-icon active" title="Explorador">🗂️</div>
+      <div class="activity-icon" title="Búsqueda">🔍</div>
+      <div class="activity-icon" title="Git">🌿</div>
+      <div class="activity-icon" title="Extensiones">🧩</div>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-title">EXPLORADOR</div>
+
+      <div class="tree-folder" data-folder="f1"><span class="chev">▾</span>📁 primer-periodo</div>
+      <div class="tree-children" data-folder-children="f1">
+        <div class="tree-item active" data-view="inicio"><span class="file-icon">🏠</span>inicio.md</div>
+        <div class="tree-item" data-view="horario"><span class="file-icon">📅</span>horario.md</div>
+        <div class="tree-item" data-view="cursos"><span class="file-icon">📚</span>cursos.md</div>
+        <div class="tree-item" data-view="apps"><span class="file-icon">🧰</span>apps.config</div>
+        <div class="tree-item" data-view="recursos"><span class="file-icon">🔗</span>recursos.md</div>
+      </div>
+
+      <div class="tree-folder" data-folder="f2"><span class="chev">▾</span>📁 herramientas</div>
+      <div class="tree-children" data-folder-children="f2">
+        <div class="tree-item" data-view="cheatsheet"><span class="file-icon">⌨️</span>cheatsheet.md</div>
+        <div class="tree-item" data-view="pomodoro"><span class="file-icon">⏱️</span>pomodoro.app</div>
+        <div class="tree-item" data-view="glosario"><span class="file-icon">📖</span>glosario.md</div>
+      </div>
+    </div>
+
+    <div class="editor">
+      <div class="tabs">
+        <div class="tab active" data-view="inicio"><span class="file-icon">🏠</span>inicio.md</div>
+        <div class="tab" data-view="horario"><span class="file-icon">📅</span>horario.md</div>
+        <div class="tab" data-view="cursos"><span class="file-icon">📚</span>cursos.md</div>
+        <div class="tab" data-view="apps"><span class="file-icon">🧰</span>apps.config</div>
+        <div class="tab" data-view="recursos"><span class="file-icon">🔗</span>recursos.md</div>
+        <div class="tab" data-view="cheatsheet"><span class="file-icon">⌨️</span>cheatsheet.md</div>
+        <div class="tab" data-view="pomodoro"><span class="file-icon">⏱️</span>pomodoro.app</div>
+        <div class="tab" data-view="glosario"><span class="file-icon">📖</span>glosario.md</div>
+      </div>
+      <div class="breadcrumb" id="breadcrumb">primer-periodo <span>› inicio.md</span></div>
+
+      <div class="view-scroll">
+
+        <!-- INICIO -->
+        <div class="view active" id="view-inicio">
+          <div class="greeting-card">
+            <div class="greet" id="greetText">Hola 👋</div>
+            <div class="greet-sub" id="greetDate"></div>
+          </div>
+
+          <div class="stat-row" id="statRow"></div>
+
+          <div class="section-label">📆 Clases de hoy</div>
+          <div class="today-list" id="todayList"></div>
+
+          <div class="section-label">⚠️ Tareas pendientes</div>
+          <div class="urgent-list" id="urgentList"></div>
+
+          <div class="section-label">🚀 Accesos rápidos</div>
+          <div class="quicklinks">
+            <div class="quicklink" data-goto="horario">📅 Ver horario completo</div>
+            <div class="quicklink" data-goto="cursos">📚 Ir a mis cursos</div>
+            <div class="quicklink" data-goto="pomodoro">⏱️ Iniciar sesión de estudio</div>
+            <div class="quicklink" data-goto="cheatsheet">⌨️ Ver atajos</div>
+            <div class="quicklink" data-goto="recursos">🔗 Explorar recursos</div>
+          </div>
+        </div>
+
+        <!-- HORARIO -->
+        <div class="view" id="view-horario">
+          <h1 class="view-title">📅 Mi horario</h1>
+          <p class="view-sub">Se repite cada semana · Desarrollo de Sistemas Front-end y Back-end</p>
+          <div class="schedule-grid" id="scheduleGrid"></div>
+          <div class="legend"><div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>Clase virtual en vivo</div></div>
+          <div class="next-class-card" id="nextClassCard"></div>
+        </div>
+
+        <!-- CURSOS -->
+        <div class="view" id="view-cursos">
+          <h1 class="view-title">📚 Cursos del ciclo</h1>
+          <p class="view-sub">Marca tareas como hechas para ver tu progreso. Todo se guarda automáticamente.</p>
+          <div class="cursos-grid" id="cursosGrid"></div>
+        </div>
+
+        <!-- APPS -->
+        <div class="view" id="view-apps">
+          <h1 class="view-title">🧰 Apps que vas a necesitar</h1>
+          <p class="view-sub">Herramientas del día a día en programación y ofimática.</p>
+          <div class="apps-grid" id="appsGrid"></div>
+        </div>
+
+        <!-- RECURSOS -->
+        <div class="view" id="view-recursos">
+          <h1 class="view-title">🔗 Recursos para aprender</h1>
+          <p class="view-sub"><span class="comment"># sitios, libros y canales de YouTube por tema</span></p>
+          <div id="recursosContainer"></div>
+        </div>
+
+        <!-- CHEATSHEET -->
+        <div class="view" id="view-cheatsheet">
+          <h1 class="view-title">⌨️ Cheatsheet</h1>
+          <p class="view-sub">Atajos y comandos que vas a usar todo el ciclo — para tener a la mano.</p>
+          <div class="cheat-grid" id="cheatGrid"></div>
+        </div>
+
+        <!-- POMODORO -->
+        <div class="view" id="view-pomodoro">
+          <h1 class="view-title">⏱️ Temporizador de estudio</h1>
+          <p class="view-sub">Técnica pomodoro: bloques de enfoque con descansos cortos.</p>
+          <div class="pomodoro-wrap">
+            <div class="pomodoro-timer">
+              <div class="pomo-modes">
+                <div class="pomo-mode-btn active" data-mode="focus" data-mins="25">Enfoque 25</div>
+                <div class="pomo-mode-btn" data-mode="short" data-mins="5">Descanso 5</div>
+                <div class="pomo-mode-btn" data-mode="long" data-mins="15">Descanso largo 15</div>
+              </div>
+              <div class="ring-wrap">
+                <svg width="200" height="200" viewBox="0 0 200 200">
+                  <circle cx="100" cy="100" r="88" stroke="#282838" stroke-width="12" fill="none"/>
+                  <circle id="ringProgress" cx="100" cy="100" r="88" stroke="#f9e2af" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="553" stroke-dashoffset="0"/>
+                </svg>
+                <div class="ring-time">
+                  <div class="rt-num" id="pomoDisplay">25:00</div>
+                  <div class="rt-mode" id="pomoModeLabel">Enfoque</div>
+                </div>
+              </div>
+              <div class="pomo-controls">
+                <button class="pomo-btn" id="pomoStart">▶ Iniciar</button>
+                <button class="pomo-btn secondary" id="pomoReset">↺ Reiniciar</button>
+              </div>
+              <div class="pomo-count" id="pomoCount">Sesiones completadas hoy: 0</div>
+            </div>
+            <div class="pomo-tips">
+              <div class="recurso-col">
+                <h4>Cómo usarlo</h4>
+                <ul>
+                  <li>Elige un curso o tarea antes de empezar</li>
+                  <li>25 min de enfoque total, sin celular</li>
+                  <li>Descansa 5 min al terminar</li>
+                  <li>Cada 4 bloques, toma un descanso largo</li>
+                </ul>
+              </div>
+              <div class="recurso-col">
+                <h4>Por qué funciona</h4>
+                <ul>
+                  <li>Reduce la sensación de "tarea infinita"</li>
+                  <li>Entrena tu enfoque en bloques cortos</li>
+                  <li>El sonido al terminar te avisa sin que revises el reloj</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GLOSARIO -->
+        <div class="view" id="view-glosario">
+          <h1 class="view-title">📖 Glosario de programación</h1>
+          <p class="view-sub">Términos que vas a escuchar seguido este ciclo, explicados simple.</p>
+          <input type="text" class="glosario-search" id="glosarioSearch" placeholder="Buscar un término...">
+          <div class="glosario-grid" id="glosarioGrid"></div>
+        </div>
+
+      </div>
+    </div>
   </div>
 
-  <script>
-    const simbolos = ["❋","✦","❈","❉"];
-    const total = 25;
-    for (let i = 0; i < total; i++) {
-      const p = document.createElement("div");
-      p.className = "petalo";
-      p.textContent = simbolos[Math.floor(Math.random() * simbolos.length)];
-      p.style.left = Math.random() * 100 + "vw";
-      p.style.animationDuration = (6 + Math.random() * 6) + "s";
-      p.style.animationDelay = (Math.random() * 8) + "s";
-      p.style.fontSize = (14 + Math.random() * 14) + "px";
-      document.body.appendChild(p);
+  <div class="statusbar">
+    <div class="statusbar-left"><span>🌿 primer-periodo</span><span id="statusToday"></span></div>
+    <div class="statusbar-right"><span id="statusNext"></span><span id="statusClock"></span></div>
+  </div>
+
+<script>
+/* ================= DATA ================= */
+const COURSES = [
+  {id:'prog', name:'Fundamentos de Programación', teacher:'Jorge Cespedes', tag:'PROG', color:'#f9e2af',
+    slots:[{day:1,start:'09:17',end:'11:00'},{day:2,start:'07:00',end:'08:40'}]},
+  {id:'web', name:'Desarrollo Web', teacher:'Miguel Ramos', tag:'WEB', color:'#89b4fa',
+    slots:[{day:1,start:'07:00',end:'08:53'},{day:4,start:'09:15',end:'10:45'}]},
+  {id:'ti', name:'Soporte de TI', teacher:'Jonathan Mejia', tag:'TI', color:'#f38ba8',
+    slots:[{day:0,start:'07:00',end:'10:23'}]},
+  {id:'logica', name:'Fundamentos Lógico-matemáticos', teacher:'Jorge Cespedes', tag:'LOG', color:'#94e2d5',
+    slots:[{day:2,start:'08:45',end:'11:00'}]},
+  {id:'blandas', name:'Desarrollo de Habilidades Intrapersonales', teacher:'Carlos Robles', tag:'SOFT', color:'#cba6f7',
+    slots:[{day:3,start:'07:00',end:'09:15'}]},
+  {id:'ofimatica', name:'Herramientas Ofimáticas para la Investigación', teacher:'Benjamin Rodriguez', tag:'OFI', color:'#fab387',
+    slots:[{day:3,start:'09:30',end:'11:00'}]},
+  {id:'lectura', name:'Lectura Comprensiva y Escritura', teacher:'Erick Hualpa', tag:'LEC', color:'#a6e3a1',
+    slots:[{day:4,start:'07:00',end:'09:15'}]},
+];
+const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+const DAY_START = 7 * 60, DAY_END = 11.5 * 60, ROW_PX_PER_MIN = 1.15;
+
+const APPS = [
+  {icon:'🖥️', name:'Visual Studio Code', tag:'editor de código', desc:'Donde vas a escribir todo tu código. Instálale extensiones como Live Server, Prettier e Indent-Rainbow para empezar.'},
+  {icon:'🌿', name:'Git & GitHub', tag:'control de versiones', desc:'Guarda el historial de tus proyectos y te permite subirlos a la nube. Se usa desde la terminal o directo en VS Code.'},
+  {icon:'💻', name:'Terminal / Linux', tag:'línea de comandos', desc:'Ya usas Linux, así que aprovecha: practicar comandos básicos te va a servir muchísimo en Soporte de TI.'},
+  {icon:'🧭', name:'Chrome DevTools', tag:'depuración web', desc:'Inspecciona HTML/CSS/JS en vivo, revisa errores en consola y prueba diseños responsive directo en el navegador.'},
+  {icon:'🟢', name:'Node.js', tag:'entorno JavaScript', desc:'Te permite ejecutar JavaScript fuera del navegador. Lo vas a necesitar para instalar paquetes y correr proyectos web.'},
+  {icon:'📄', name:'LibreOffice / Google Docs', tag:'ofimática', desc:'Procesador de textos, hojas de cálculo y presentaciones — la base del curso de Herramientas Ofimáticas.'},
+  {icon:'🗒️', name:'Notion o Trello', tag:'organización', desc:'Para llevar tus tareas pendientes, apuntes de clase y fechas de entrega en un solo lugar.'},
+  {icon:'💬', name:'Discord', tag:'comunidad', desc:'Muchas comunidades de programación en español resuelven dudas ahí; útil para no trabarte solo.'},
+];
+
+const RECURSOS = [
+  {title:'Programación y lógica', icon:'🧠', sitios:['freeCodeCamp (freecodecamp.org)','Exercism.org — ejercicios con feedback','roadmap.sh — rutas de aprendizaje'],
+   libros:['«Piensa en Python» — Allen B. Downey (gratis online)','«Automatiza tareas aburridas con Python» — Al Sweigart'],
+   canales:['HolaMundo (YouTube)','EDteam','Fazt Code']},
+  {title:'Desarrollo Web (HTML, CSS, JS)', icon:'🌐', sitios:['developer.mozilla.org (MDN) — documentación oficial','W3Schools — referencia rápida','frontendmentor.io — retos de práctica'],
+   libros:['«Eloquent JavaScript» — Marijn Haverbeke (gratis online)','«HTML y CSS» — Jon Duckett'],
+   canales:['midudev','La Cocina del Código','Fernando Herrera']},
+  {title:'Soporte de TI / Linux', icon:'🛠️', sitios:['wiki.archlinux.org — muy completa aunque uses otra distro','Ubuntu Community Help Wiki','ss64.com/bash — chuleta de comandos'],
+   libros:['«The Linux Command Line» — William Shotts (gratis en linuxcommand.org)'],
+   canales:['HolaMundo','Alvaro Chirou']},
+  {title:'Herramientas Ofimáticas', icon:'📊', sitios:['support.microsoft.com/office','Google Workspace Learning Center'],
+   libros:['Guías oficiales de Excel / Word de Microsoft (gratis en su web)'],
+   canales:['Excel Fácil','Yasser Rodriguez']},
+  {title:'Lógica, comunicación y hábitos de estudio', icon:'✍️', sitios:['Khan Academy — lógica y matemática básica'],
+   libros:['«Cómo hablar en público sin miedo» — recurso general de comunicación'],
+   canales:['Platzi (canal en YouTube, contenido gratuito)']},
+];
+
+const CHEATSHEET = [
+  {title:'⌨️ VS Code — atajos esenciales', rows:[
+    ['Ctrl + P','Buscar archivo rápido'],['Ctrl + Shift + P','Paleta de comandos'],
+    ['Ctrl + `','Abrir terminal integrada'],['Ctrl + B','Mostrar/ocultar barra lateral'],
+    ['Ctrl + /','Comentar línea'],['Alt + ↑ / ↓','Mover línea arriba/abajo'],
+    ['Ctrl + D','Seleccionar próxima coincidencia'],['F2','Renombrar símbolo'],
+    ['Ctrl + Shift + K','Eliminar línea'],['Ctrl + S','Guardar archivo'],
+  ]},
+  {title:'💻 Terminal Linux — comandos básicos', rows:[
+    ['pwd','Muestra la carpeta actual'],['ls -la','Lista archivos, incluidos ocultos'],
+    ['cd carpeta','Cambiar de carpeta'],['mkdir nombre','Crear carpeta'],
+    ['rm -r nombre','Eliminar carpeta y su contenido'],['cp origen destino','Copiar archivo'],
+    ['mv origen destino','Mover o renombrar'],['cat archivo','Ver contenido de un archivo'],
+    ['grep "texto" archivo','Buscar texto dentro de un archivo'],['sudo apt update','Actualizar paquetes (Debian/Ubuntu)'],
+  ]},
+  {title:'🌿 Git — flujo básico', rows:[
+    ['git init','Crear un repositorio nuevo'],['git status','Ver qué cambió'],
+    ['git add .','Preparar todos los cambios'],['git commit -m "msj"','Guardar los cambios con un mensaje'],
+    ['git push','Subir cambios a GitHub'],['git pull','Traer cambios del repositorio remoto'],
+    ['git clone url','Descargar un repositorio existente'],['git branch','Ver o crear ramas'],
+  ]},
+];
+
+const GLOSARIO = [
+  ['Variable','Un espacio con nombre donde guardas un valor para usarlo después.'],
+  ['Función','Bloque de código reutilizable que realiza una tarea específica.'],
+  ['Bucle (loop)','Repite una parte del código varias veces, como for o while.'],
+  ['Condicional (if)','Ejecuta código solo si se cumple una condición.'],
+  ['Array / Arreglo','Lista ordenada de valores, accesibles por posición.'],
+  ['Objeto','Estructura que agrupa datos relacionados en pares clave-valor.'],
+  ['API','Forma en que dos programas se comunican entre sí.'],
+  ['Frontend','La parte visual de una app: lo que el usuario ve y toca.'],
+  ['Backend','La lógica y los datos que funcionan "detrás" de la app.'],
+  ['Base de datos','Lugar donde se guarda la información de forma organizada.'],
+  ['Framework','Conjunto de herramientas que facilita construir software.'],
+  ['Repositorio','Carpeta de proyecto cuyo historial rastrea Git.'],
+  ['Commit','Una "foto" guardada de los cambios hechos en el código.'],
+  ['Terminal','Interfaz de texto para darle órdenes a la computadora.'],
+  ['Debug','Proceso de encontrar y corregir errores en el código.'],
+  ['Responsive','Diseño que se adapta a distintos tamaños de pantalla.'],
+  ['IDE','Programa (como VS Code) donde escribes, pruebas y depuras código.'],
+  ['Sintaxis','Reglas de escritura que un lenguaje de programación exige.'],
+];
+
+/* ================= HELPERS ================= */
+function timeToMin(t){const [h,m]=t.split(':').map(Number); return h*60+m;}
+function todayIndex(){const d = new Date().getDay(); return d - 1;}
+
+/* ================= SCHEDULE ================= */
+function renderSchedule(){
+  const grid = document.getElementById('scheduleGrid');
+  const totalMin = DAY_END - DAY_START;
+  const heightPx = totalMin * ROW_PX_PER_MIN;
+  const ti = todayIndex();
+  let html = `<div class="sg-corner"></div>`;
+  DAYS.forEach((d,i)=>{ html += `<div class="sg-head ${i===ti?'today':''}">${d}</div>`; });
+  html += `<div class="sg-time" style="grid-column:1; height:${heightPx}px; position:relative;">`;
+  for(let m=DAY_START; m<=DAY_END; m+=60){
+    const top = (m-DAY_START)*ROW_PX_PER_MIN;
+    const hh = String(Math.floor(m/60)).padStart(2,'0');
+    html += `<div style="position:absolute; top:${top}px; right:6px;">${hh}:00</div>`;
+  }
+  html += `</div>`;
+  DAYS.forEach((d,i)=>{
+    html += `<div class="sg-cell ${i===ti?'today-col':''}" style="height:${heightPx}px;">`;
+    COURSES.forEach(c=>{
+      c.slots.filter(s=>s.day===i).forEach(s=>{
+        const top = (timeToMin(s.start)-DAY_START)*ROW_PX_PER_MIN;
+        const h = (timeToMin(s.end)-timeToMin(s.start))*ROW_PX_PER_MIN;
+        html += `<div class="class-block" style="top:${top}px; height:${h}px; border-left-color:${c.color};">
+          <span class="cname">${c.name}</span><span class="cteacher">${c.teacher}</span><span class="ctime">${s.start}–${s.end}</span></div>`;
+      });
+    });
+    html += `</div>`;
+  });
+  grid.innerHTML = html;
+}
+
+function getNextClass(){
+  const now = new Date();
+  const curDay = now.getDay();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  let best = null, bestDelta = Infinity;
+  for(let offset=0; offset<8; offset++){
+    const checkDow = (curDay + offset) % 7;
+    const dayIdx = checkDow - 1;
+    if(dayIdx < 0 || dayIdx > 4) continue;
+    COURSES.forEach(c=>{
+      c.slots.filter(s=>s.day===dayIdx).forEach(s=>{
+        const startMin = timeToMin(s.start);
+        let delta = offset*1440 + startMin - nowMin;
+        if(offset===0 && startMin < nowMin){
+          const endMin = timeToMin(s.end);
+          if(nowMin <= endMin){ delta = -1; } else { return; }
+        }
+        if(delta < bestDelta){ bestDelta = delta; best = {course:c, slot:s, dayIdx, live: delta===-1}; }
+      });
+    });
+  }
+  return best;
+}
+
+function renderNextClass(){
+  const card = document.getElementById('nextClassCard');
+  const statusNext = document.getElementById('statusNext');
+  const statusToday = document.getElementById('statusToday');
+  statusToday.textContent = '📆 ' + new Date().toLocaleDateString('es-PE', {weekday:'long', day:'2-digit', month:'short'});
+  const nc = getNextClass();
+  if(!nc){ card.innerHTML = `<div>No hay más clases programadas por ahora 🎉</div>`; statusNext.textContent=''; return; }
+  if(nc.live){
+    card.innerHTML = `<div class="pulse"></div><div><b>${nc.course.name}</b> está en vivo ahora — ${nc.slot.start}–${nc.slot.end} con ${nc.course.teacher}</div>`;
+    statusNext.textContent = '🔴 en vivo: ' + nc.course.tag;
+  } else {
+    card.innerHTML = `<div class="pulse" style="background:var(--accent)"></div><div>Próxima clase: <b>${nc.course.name}</b> — ${DAYS[nc.dayIdx]} ${nc.slot.start} con ${nc.course.teacher}</div>`;
+    statusNext.textContent = '⏭ próxima: ' + nc.course.tag + ' ' + nc.slot.start;
+  }
+  return nc;
+}
+
+function getTodayClasses(){
+  const ti = todayIndex();
+  if(ti < 0 || ti > 4) return [];
+  const list = [];
+  COURSES.forEach(c=>{ c.slots.filter(s=>s.day===ti).forEach(s=>list.push({course:c, slot:s})); });
+  list.sort((a,b)=>timeToMin(a.slot.start)-timeToMin(b.slot.start));
+  return list;
+}
+
+function tickClock(){ document.getElementById('statusClock').textContent = new Date().toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit'}); }
+
+/* ================= TASKS (persistente) ================= */
+async function loadTasks(courseId){
+  try{ const res = await window.storage.get('tasks:'+courseId, false); return res ? JSON.parse(res.value) : []; }
+  catch(e){ return []; }
+}
+async function saveTasks(courseId, tasks){
+  try{ await window.storage.set('tasks:'+courseId, JSON.stringify(tasks), false); }catch(e){ console.error(e); }
+}
+
+async function renderCursos(){
+  const grid = document.getElementById('cursosGrid');
+  grid.innerHTML = '';
+  for(const c of COURSES){
+    const scheduleTxt = c.slots.map(s=>`${DAYS[s.day].slice(0,3)} ${s.start}–${s.end}`).join(' · ');
+    const card = document.createElement('div');
+    card.className = 'curso-card';
+    card.innerHTML = `
+      <span class="tag" style="background:${c.color}">${c.tag}</span>
+      <h3>${c.name}</h3>
+      <div class="docente">👤 ${c.teacher}</div>
+      <div class="schedule-line">${scheduleTxt}</div>
+      <div>
+        <div class="progress-track"><div class="progress-fill" id="prog-${c.id}" style="width:0%; background:${c.color};"></div></div>
+        <div class="progress-label"><span id="proglabel-${c.id}">0/0 tareas</span></div>
+      </div>
+      <div class="todo-list" data-course="${c.id}"></div>
+      <div class="todo-add">
+        <input type="text" placeholder="Añadir tarea o nota..." data-add-course="${c.id}">
+        <button data-btn-course="${c.id}">+</button>
+      </div>
+    `;
+    grid.appendChild(card);
+    await renderTaskList(c.id);
+  }
+  grid.querySelectorAll('[data-add-course]').forEach(input=>{
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') addTask(input.dataset.addCourse, input); });
+  });
+  grid.querySelectorAll('[data-btn-course]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const input = grid.querySelector(`[data-add-course="${btn.dataset.btnCourse}"]`);
+      addTask(btn.dataset.btnCourse, input);
+    });
+  });
+}
+
+async function addTask(courseId, input){
+  const text = input.value.trim();
+  if(!text) return;
+  const tasks = await loadTasks(courseId);
+  tasks.push({text, done:false, id: Date.now()});
+  await saveTasks(courseId, tasks);
+  input.value = '';
+  await renderTaskList(courseId);
+}
+
+async function renderTaskList(courseId){
+  const container = document.querySelector(`.todo-list[data-course="${courseId}"]`);
+  if(!container) return;
+  const tasks = await loadTasks(courseId);
+  const done = tasks.filter(t=>t.done).length;
+  const fill = document.getElementById('prog-'+courseId);
+  const label = document.getElementById('proglabel-'+courseId);
+  if(fill) fill.style.width = tasks.length ? Math.round(done/tasks.length*100)+'%' : '0%';
+  if(label) label.textContent = `${done}/${tasks.length} tareas`;
+
+  if(tasks.length===0){ container.innerHTML = `<div class="empty-tasks">Sin tareas todavía</div>`; return; }
+  container.innerHTML = tasks.map(t=>`
+    <div class="todo-item ${t.done?'done':''}" data-id="${t.id}">
+      <input type="checkbox" ${t.done?'checked':''} data-toggle="${t.id}" data-course="${courseId}">
+      <span>${t.text}</span>
+      <span class="todo-del" data-del="${t.id}" data-course="${courseId}">✕</span>
+    </div>`).join('');
+
+  container.querySelectorAll('[data-toggle]').forEach(cb=>{
+    cb.addEventListener('change', async ()=>{
+      const tasks = await loadTasks(cb.dataset.course);
+      const t = tasks.find(x=>x.id==cb.dataset.toggle);
+      if(t) t.done = cb.checked;
+      await saveTasks(cb.dataset.course, tasks);
+      renderTaskList(cb.dataset.course);
+      renderHome();
+    });
+  });
+  container.querySelectorAll('[data-del]').forEach(del=>{
+    del.addEventListener('click', async ()=>{
+      let tasks = await loadTasks(del.dataset.course);
+      tasks = tasks.filter(x=>x.id!=del.dataset.del);
+      await saveTasks(del.dataset.course, tasks);
+      renderTaskList(del.dataset.course);
+      renderHome();
+    });
+  });
+}
+
+/* ================= APPS / RECURSOS / CHEATSHEET / GLOSARIO ================= */
+function renderApps(){
+  document.getElementById('appsGrid').innerHTML = APPS.map(a=>`
+    <div class="app-card"><div class="app-icon">${a.icon}</div>
+      <div><h3>${a.name}</h3><p>${a.desc}</p><span class="app-tag"># ${a.tag}</span></div>
+    </div>`).join('');
+}
+
+function renderRecursos(){
+  document.getElementById('recursosContainer').innerHTML = RECURSOS.map(r=>`
+    <div class="recurso-block"><h2>${r.icon} ${r.title}</h2>
+      <div class="recurso-cols">
+        <div class="recurso-col"><h4>Sitios web</h4><ul>${r.sitios.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="recurso-col"><h4>Libros</h4><ul>${r.libros.map(s=>`<li>${s}</li>`).join('')}</ul></div>
+        <div class="recurso-col"><h4>Canales de YouTube</h4><ul>${r.canales.map(s=>`<li><b>${s}</b></li>`).join('')}</ul></div>
+      </div>
+    </div>`).join('');
+}
+
+function renderCheatsheet(){
+  document.getElementById('cheatGrid').innerHTML = CHEATSHEET.map(block=>`
+    <div class="cheat-block"><h3>${block.title}</h3>
+      ${block.rows.map(r=>`<div class="cheat-row"><span class="cheat-key">${r[0]}</span><span class="cheat-desc">${r[1]}</span></div>`).join('')}
+    </div>`).join('');
+}
+
+function renderGlosario(){
+  const grid = document.getElementById('glosarioGrid');
+  grid.innerHTML = GLOSARIO.map(g=>`
+    <div class="glosario-item" data-term="${g[0].toLowerCase()}">
+      <div class="g-term">${g[0]}</div><div class="g-def">${g[1]}</div>
+    </div>`).join('');
+  document.getElementById('glosarioSearch').addEventListener('input', e=>{
+    const q = e.target.value.toLowerCase();
+    grid.querySelectorAll('.glosario-item').forEach(el=>{
+      el.classList.toggle('hidden', !el.dataset.term.includes(q) && !el.textContent.toLowerCase().includes(q));
+    });
+  });
+}
+
+/* ================= HOME DASHBOARD ================= */
+async function renderHome(){
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
+  document.getElementById('greetText').textContent = `${greet} 👋`;
+  document.getElementById('greetDate').textContent = new Date().toLocaleDateString('es-PE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  // Today classes
+  const today = getTodayClasses();
+  const todayList = document.getElementById('todayList');
+  todayList.innerHTML = today.length ? today.map(t=>`
+    <div class="today-item" style="border-left-color:${t.course.color}">
+      <span class="ti-time">${t.slot.start}–${t.slot.end}</span>
+      <div><div class="ti-name">${t.course.name}</div><div class="ti-teacher">${t.course.teacher}</div></div>
+    </div>`).join('') : `<div class="empty-today">No tienes clases programadas hoy 🎉</div>`;
+
+  // Aggregate tasks
+  let totalPending = 0, totalDone = 0;
+  const pendingItems = [];
+  for(const c of COURSES){
+    const tasks = await loadTasks(c.id);
+    tasks.forEach(t=>{
+      if(t.done) totalDone++; else { totalPending++; pendingItems.push({...t, course:c}); }
+    });
+  }
+
+  const statRow = document.getElementById('statRow');
+  const nc = getNextClass();
+  statRow.innerHTML = `
+    <div class="stat-card accent"><div class="stat-num">${COURSES.length}</div><div class="stat-label">Cursos activos</div></div>
+    <div class="stat-card danger"><div class="stat-num">${totalPending}</div><div class="stat-label">Tareas pendientes</div></div>
+    <div class="stat-card success"><div class="stat-num">${totalDone}</div><div class="stat-label">Tareas completadas</div></div>
+    <div class="stat-card accent2"><div class="stat-num" style="font-size:15px">${nc ? nc.course.tag : '—'}</div><div class="stat-label">${nc ? (nc.live ? 'En vivo ahora' : DAYS[nc.dayIdx] + ' ' + nc.slot.start) : 'Sin próxima clase'}</div></div>
+  `;
+
+  const urgentList = document.getElementById('urgentList');
+  urgentList.innerHTML = pendingItems.length ? pendingItems.slice(0,6).map(t=>`
+    <div class="urgent-item"><span class="u-tag" style="background:${t.course.color}">${t.course.tag}</span><span>${t.text}</span></div>
+  `).join('') : `<div class="empty-today">No tienes tareas pendientes. ¡Vas al día! ✅</div>`;
+}
+
+/* ================= POMODORO ================= */
+const POMO_RADIUS = 88, POMO_CIRC = 2 * Math.PI * POMO_RADIUS;
+let pomoTotal = 25*60, pomoRemaining = 25*60, pomoRunning = false, pomoInterval = null, pomoSessions = 0;
+
+function fmtMMSS(sec){ const m = Math.floor(sec/60), s = sec%60; return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); }
+
+function updatePomoRing(){
+  const ring = document.getElementById('ringProgress');
+  const frac = pomoRemaining / pomoTotal;
+  ring.setAttribute('stroke-dasharray', POMO_CIRC);
+  ring.setAttribute('stroke-dashoffset', POMO_CIRC * (1-frac));
+  document.getElementById('pomoDisplay').textContent = fmtMMSS(pomoRemaining);
+}
+
+function beep(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880; o.type = 'sine';
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    o.start(); o.stop(ctx.currentTime + 0.5);
+  }catch(e){}
+}
+
+function pomoTick(){
+  pomoRemaining--;
+  updatePomoRing();
+  if(pomoRemaining <= 0){
+    clearInterval(pomoInterval); pomoRunning = false;
+    document.getElementById('pomoStart').textContent = '▶ Iniciar';
+    beep();
+    const activeMode = document.querySelector('.pomo-mode-btn.active').dataset.mode;
+    if(activeMode === 'focus'){
+      pomoSessions++;
+      document.getElementById('pomoCount').textContent = `Sesiones completadas hoy: ${pomoSessions}`;
     }
-  </script>
+  }
+}
 
+function setPomoMode(btn){
+  document.querySelectorAll('.pomo-mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  clearInterval(pomoInterval); pomoRunning = false;
+  document.getElementById('pomoStart').textContent = '▶ Iniciar';
+  const mins = parseInt(btn.dataset.mins);
+  pomoTotal = mins*60; pomoRemaining = mins*60;
+  document.getElementById('pomoModeLabel').textContent = btn.dataset.mode==='focus' ? 'Enfoque' : 'Descanso';
+  updatePomoRing();
+}
+
+function initPomodoro(){
+  document.querySelectorAll('.pomo-mode-btn').forEach(b=> b.addEventListener('click', ()=>setPomoMode(b)) );
+  document.getElementById('pomoStart').addEventListener('click', ()=>{
+    if(pomoRunning){
+      clearInterval(pomoInterval); pomoRunning = false;
+      document.getElementById('pomoStart').textContent = '▶ Iniciar';
+    } else {
+      if(pomoRemaining <= 0) pomoRemaining = pomoTotal;
+      pomoRunning = true;
+      document.getElementById('pomoStart').textContent = '⏸ Pausar';
+      pomoInterval = setInterval(pomoTick, 1000);
+    }
+  });
+  document.getElementById('pomoReset').addEventListener('click', ()=>{
+    clearInterval(pomoInterval); pomoRunning = false;
+    pomoRemaining = pomoTotal;
+    document.getElementById('pomoStart').textContent = '▶ Iniciar';
+    updatePomoRing();
+  });
+  updatePomoRing();
+}
+
+/* ================= NAV ================= */
+const FILE_NAMES = {inicio:'inicio.md', horario:'horario.md', cursos:'cursos.md', apps:'apps.config', recursos:'recursos.md', cheatsheet:'cheatsheet.md', pomodoro:'pomodoro.app', glosario:'glosario.md'};
+
+function switchView(viewName){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+viewName).classList.add('active');
+  document.querySelectorAll('.tree-item').forEach(t=>t.classList.toggle('active', t.dataset.view===viewName));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.view===viewName));
+  document.getElementById('titlebarLabel').textContent = FILE_NAMES[viewName] + ' — estudios — Visual Studio Code';
+  document.getElementById('breadcrumb').innerHTML = `primer-periodo <span>› ${FILE_NAMES[viewName]}</span>`;
+  document.getElementById('sidebar').classList.remove('open');
+  if(viewName === 'inicio') renderHome();
+}
+
+document.querySelectorAll('.tree-item, .tab').forEach(el=>{
+  el.addEventListener('click', ()=> switchView(el.dataset.view));
+});
+document.querySelectorAll('[data-goto]').forEach(el=>{
+  el.addEventListener('click', ()=> switchView(el.dataset.goto));
+});
+document.querySelectorAll('.tree-folder').forEach(f=>{
+  f.addEventListener('click', ()=>{
+    f.classList.toggle('collapsed');
+    document.querySelector(`[data-folder-children="${f.dataset.folder}"]`).classList.toggle('collapsed');
+  });
+});
+document.getElementById('mobileToggle').addEventListener('click', ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+/* ================= INIT ================= */
+renderSchedule();
+renderNextClass();
+renderCursos();
+renderApps();
+renderRecursos();
+renderCheatsheet();
+renderGlosario();
+renderHome();
+initPomodoro();
+tickClock();
+setInterval(tickClock, 30000);
+setInterval(renderNextClass, 60000);
+</script>
 </body>
 </html>
